@@ -10,7 +10,7 @@ export class RecommendationAPI {
   private dataset: Dataset | null = null;
   private trainedInteractions: Map<number, Set<number>> = new Map();
 
-  constructor(private port: number = 3000) {
+  constructor(private port: number = 3001) {
     this.app = express();
     this.setupMiddleware();
     this.setupRoutes();

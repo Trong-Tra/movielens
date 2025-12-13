@@ -69,19 +69,22 @@ The system will:
 2. Split data into train/test sets (80/20)
 3. Train all models
 4. Evaluate each model
-5. Start the API server on http://localhost:3000
+5. Start the API server on http://localhost:3001
 
-#### Frontend (React SPA)
+#### Frontend (Next.js with Tailwind CSS)
 
 ```bash
 # Development mode (with hot reload)
-npm run dev:client
+npm run dev:next
 
 # Build for production
-npm run build:client
+npm run build:next
+
+# Start production server
+npm run start:next
 ```
 
-The frontend will be available at http://localhost:5173 (Vite dev server) with proxy to backend API.
+The frontend will be available at http://localhost:3000 (Next.js) with automatic API proxy to backend at port 3001.
 
 ## 📊 Dataset
 
@@ -218,11 +221,11 @@ MOVIELENS_DATASET_PATH=./ml-1m
 
 ## 🎨 Web Interface
 
-### React Frontend
+### Next.js Frontend
 
-A modern, interactive single-page application built with React, TypeScript, and Vite.
+A modern, interactive single-page application built with Next.js, TypeScript, and Tailwind CSS.
 
-**URL**: `http://localhost:5173` (development mode)
+**URL**: `http://localhost:3000` (development mode)
 
 #### Features:
 - **User Registration**: Create a new user profile with name, age, and gender
@@ -240,7 +243,7 @@ A modern, interactive single-page application built with React, TypeScript, and 
 
 ### API Endpoints
 
-Direct API access at `http://localhost:3000/api`:
+Direct API access at `http://localhost:3001/api`:
 
 - `GET /api/health` - Server status
 - `GET /api/models` - List available models
