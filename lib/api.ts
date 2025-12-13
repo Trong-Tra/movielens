@@ -20,7 +20,16 @@ export const getRecommendations = async (
   const response = await axios.get(
     `${API_BASE}/recommendations/${userId}?model=${model}&n=${n}`
   );
-  return response.data.recommendations;
+  // Transform backend response to match frontend type
+  return response.data.recommendations.map((rec: any) => ({
+    movie: {
+      id: rec.itemId,
+      title: rec.title,
+      genres: rec.genres
+    },
+    score: rec.score,
+    explanation: rec.explanation
+  }));
 };
 
 export const searchMovies = async (query: string, limit: number = 20): Promise<Movie[]> => {
