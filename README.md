@@ -51,12 +51,17 @@ npm run build
 
 ### Running the System
 
+#### Backend (API Server)
+
 ```bash
 # Development mode (with auto-reload)
 npm run dev
 
 # Production mode
 npm start
+
+# Quick demo (without ItemItemCF for faster startup)
+npm run demo
 ```
 
 The system will:
@@ -65,6 +70,18 @@ The system will:
 3. Train all models
 4. Evaluate each model
 5. Start the API server on http://localhost:3000
+
+#### Frontend (React SPA)
+
+```bash
+# Development mode (with hot reload)
+npm run dev:client
+
+# Build for production
+npm run build:client
+```
+
+The frontend will be available at http://localhost:5173 (Vite dev server) with proxy to backend API.
 
 ## 📊 Dataset
 
@@ -201,14 +218,35 @@ MOVIELENS_DATASET_PATH=./ml-1m
 
 ## 🎨 Web Interface
 
-Access the web UI at `http://localhost:3000` after starting the server.
+### React Frontend
 
-Features:
-- Select user and model
-- Adjust number of recommendations
-- Try random users
-- View movie details and genres
-- Compare model outputs
+A modern, interactive single-page application built with React, TypeScript, and Vite.
+
+**URL**: `http://localhost:5173` (development mode)
+
+#### Features:
+- **User Registration**: Create a new user profile with name, age, and gender
+- **Movie Onboarding**: Rate at least 5 movies to build your preference profile
+- **Personalized Recommendations**: Get recommendations from different algorithms
+- **Model Comparison**: Switch between models and compare results
+- **Movie Search**: Find and explore movies in the catalog
+- **Rating Analytics**: View your rating distribution and history
+- **Performance Metrics**: See model accuracy metrics (Precision, Recall, NDCG)
+
+#### User Flow:
+1. **Welcome Page**: Enter your name and optional demographic info
+2. **Onboarding**: Rate 5+ movies from a curated selection
+3. **Dashboard**: View personalized recommendations, search movies, and explore
+
+### API Endpoints
+
+Direct API access at `http://localhost:3000/api`:
+
+- `GET /api/health` - Server status
+- `GET /api/models` - List available models
+- `GET /api/recommendations/:userId?model=...&n=10` - Get recommendations
+- `GET /api/movies/search/:query?limit=20` - Search movies
+- `GET /api/users/random?count=10` - Get random user IDs
 
 ## 🧩 Extending the System
 
