@@ -197,4 +197,5 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ user, onComplete }) => 
   );
 };
 
+export { OnboardingPage };
 export default OnboardingPage;
