@@ -19,7 +19,6 @@ export class RecommendationAPI {
   private setupMiddleware(): void {
     this.app.use(cors());
     this.app.use(express.json());
-    this.app.use(express.static(path.join(__dirname, '../../public')));
   }
 
   private setupRoutes(): void {
