@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
+    "build:client": "vite build",
     "dev": "nodemon --exec ts-node src/server.ts",
+    "dev:client": "vite",
     "demo": "ts-node src/demo.ts",
     "start": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User, Rating, Movie } from '../types';
-import { api } from '../services/api';
+import { searchMovies } from '../services/api';
 import { FaStar, FaRedo, FaCheck } from 'react-icons/fa';
 import './OnboardingPage.css';
 
@@ -30,10 +30,10 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({ user, onComplete }) => 
       const queries = ['star', 'matrix', 'godfather', 'lord', 'harry', 'avengers', 'inception', 'batman'];
       const randomQuery = queries[Math.floor(Math.random() * queries.length)];
       
-      const response = await api.searchMovies(randomQuery, 20);
+      const results = await searchMovies(randomQuery, 20);
       
       // Shuffle and take random 10 movies
-      const shuffled = response.data.results
+      const shuffled = results
         .sort(() => Math.random() - 0.5)
         .slice(0, 10);
       

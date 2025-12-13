@@ -19,17 +19,21 @@ export interface Rating {
 }
 
 export interface Recommendation {
-  itemId: number;
+  movie: Movie;
   score: number;
   explanation?: string;
-  title?: string;
-  genres?: string[];
 }
 
 export interface RecommendationResponse {
   userId: number;
   model: string;
   recommendations: Recommendation[];
+}
+
+export interface ModelInfo {
+  name: string;
+  description: string;
+  metrics: Record<string, number | string>;
 }
 
 export interface ModelMetrics {

@@ -172,4 +172,5 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ onUserCreated }) => {
   );
 };
 
+export { WelcomePage };
 export default WelcomePage;
