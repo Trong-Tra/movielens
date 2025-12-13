@@ -1,16 +1,10 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    --gradient-start: #6366f1;
-    --gradient-end: #8b5cf6;
-  }
-  
-  body {
-    @apply bg-gray-50 text-gray-900;
-  }
+@theme {
+  --color-primary: #6366f1;
+  --color-secondary: #8b5cf6;
+  --color-success: #10b981;
+  --color-error: #ef4444;
 }
 
 @layer components {
