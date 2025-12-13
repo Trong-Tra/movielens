@@ -9,3 +9,12 @@ data/*.dat
 .vscode/
 coverage/
 *.swp
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Old Vite files (archived)
+client/
+vite.config.ts

@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "build:next": "next build",
+    "build": "tsc && next build",
     "dev": "nodemon --exec ts-node src/server.ts",
     "dev:next": "next dev",
     "demo": "ts-node src/demo.ts",
@@ -39,8 +38,6 @@
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@vitejs/plugin-react": "^5.1.2",
-    "vite": "^7.2.7"
+    "@types/express": "^5.0.6"
   }
 }
