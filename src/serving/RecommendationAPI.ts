@@ -179,8 +179,7 @@ export class RecommendationAPI {
       console.log(`   - GET /api/recommendations/:userId?model=<model>&n=<count>`);
       console.log(`   - GET /api/movies/:movieId`);
       console.log(`   - GET /api/movies/search/:query`);
-      console.log(`   - GET /api/users/random?count=<count>`);
-      console.log(`\n🎬 Web UI available at http://localhost:${this.port}\n`);
+      console.log(`   - GET /api/users/random?count=<count>\n`);
     });
   }
 }
