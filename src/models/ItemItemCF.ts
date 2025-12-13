@@ -41,6 +41,8 @@ export class ItemItemCF implements RecommenderModel {
     const items = Array.from(this.allItems);
     console.log(`Computing similarities for ${items.length} items...`);
     
+    // For large datasets, compute similarities in batches
+    const batchSize = 100;
     for (let i = 0; i < items.length; i++) {
       const itemI = items[i];
       const usersI = itemUsers.get(itemI);
@@ -48,13 +50,25 @@ export class ItemItemCF implements RecommenderModel {
 
       const similarities: Array<{ itemId: number; similarity: number }> = [];
 
-      for (let j = i + 1; j < items.length; j++) {
-        const itemJ = items[j];
+      // Only compute with items that have overlapping users for efficiency
+      const candidateItems = new Set<number>();
+      for (const userId of usersI.keys()) {
+        const userInteractions = this.userItems.get(userId);
+        if (userInteractions) {
+          for (const itemId of userInteractions.keys()) {
+            if (itemId !== itemI) {
+              candidateItems.add(itemId);
+            }
+          }
+        }
+      }
+
+      for (const itemJ of candidateItems) {
         const usersJ = itemUsers.get(itemJ);
         if (!usersJ) continue;
 
         const similarity = this.cosineSimilarity(usersI, usersJ);
-        if (similarity > 0) {
+        if (similarity > 0.01) { // Threshold to reduce noise
           similarities.push({ itemId: itemJ, similarity });
         }
       }
@@ -67,18 +81,12 @@ export class ItemItemCF implements RecommenderModel {
         const simMap = new Map<number, number>();
         for (const { itemId, similarity } of topK) {
           simMap.set(itemId, similarity);
-          
-          // Store symmetric similarity
-          if (!this.itemSimilarities.has(itemId)) {
-            this.itemSimilarities.set(itemId, new Map());
-          }
-          this.itemSimilarities.get(itemId)!.set(itemI, similarity);
         }
         this.itemSimilarities.set(itemI, simMap);
       }
 
-      if ((i + 1) % 100 === 0) {
-        console.log(`Processed ${i + 1}/${items.length} items`);
+      if ((i + 1) % batchSize === 0) {
+        console.log(`  Processed ${i + 1}/${items.length} items`);
       }
     }
 

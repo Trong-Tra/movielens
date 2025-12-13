@@ -16,9 +16,9 @@ export class MatrixFactorizationModel implements RecommenderModel {
   private regularization: number;
 
   constructor(
-    numFactors: number = 50,
-    numIterations: number = 10,
-    regularization: number = 0.01
+    numFactors: number = 30,
+    numIterations: number = 5,
+    regularization: number = 0.1
   ) {
     this.numFactors = numFactors;
     this.numIterations = numIterations;
@@ -72,10 +72,8 @@ export class MatrixFactorizationModel implements RecommenderModel {
         itemMat[i] = this.solveForFactor(matrixT[i], userMat, this.regularization);
       }
 
-      if ((iter + 1) % 5 === 0) {
-        const error = this.computeError(matrix, userMat, itemMat);
-        console.log(`Iteration ${iter + 1}, Error: ${error.toFixed(4)}`);
-      }
+      const error = this.computeError(matrix, userMat, itemMat);
+      console.log(`  Iteration ${iter + 1}/${this.numIterations}, RMSE: ${error.toFixed(4)}`);
     }
 
     // Store factors

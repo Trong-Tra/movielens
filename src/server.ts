@@ -44,9 +44,9 @@ async function main() {
   // Initialize models
   const models = [
     new PopularityModel(),
-    new MatrixFactorizationModel(50, 10, 0.01),
-    new ItemItemCF(50),
-    new GraphBasedModel(0.15, 100, 10)
+    new MatrixFactorizationModel(30, 5, 0.1),
+    new ItemItemCF(30),
+    new GraphBasedModel(0.15, 50, 8)
   ];
 
   // Train models

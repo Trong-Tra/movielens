@@ -89,9 +89,9 @@ export class MovieLensLoader {
   /**
    * Check if dataset exists at the specified path
    */
-  static datasetExists(dataPath: string): boolean {dat');
-    const moviesPath = path.join(dataPath, 'movies.datsv');
-    const moviesPath = path.join(dataPath, 'movies.csv');
+  static datasetExists(dataPath: string): boolean {
+    const ratingsPath = path.join(dataPath, 'ratings.dat');
+    const moviesPath = path.join(dataPath, 'movies.dat');
     return fs.existsSync(ratingsPath) && fs.existsSync(moviesPath);
   }
 }
