@@ -25,16 +25,25 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   "include": [
     "src/**/*",
+    "app/**/*",
+    "components/**/*",
+    "lib/**/*",
+    "types/**/*",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    "next-env.d.ts"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "data"
+    "data",
+    "client"
   ]
 }
