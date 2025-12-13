@@ -6,6 +6,8 @@ dist/
 data/*.csv
 data/*.zip
 data/*.dat
+data/ml-*
+data/models/
 .vscode/
 coverage/
 *.swp
