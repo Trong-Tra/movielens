@@ -214,4 +214,26 @@ export class MatrixFactorizationModel implements RecommenderModel {
 
     return count > 0 ? Math.sqrt(error / count) : 0;
   }
+
+  serialize(): any {
+    return {
+      userFactors: Array.from(this.userFactors.entries()),
+      itemFactors: Array.from(this.itemFactors.entries()),
+      userIds: this.userIds,
+      itemIds: this.itemIds,
+      numFactors: this.numFactors,
+      numIterations: this.numIterations,
+      regularization: this.regularization
+    };
+  }
+
+  deserialize(data: any): void {
+    this.userFactors = new Map(data.userFactors);
+    this.itemFactors = new Map(data.itemFactors);
+    this.userIds = data.userIds;
+    this.itemIds = data.itemIds;
+    this.numFactors = data.numFactors;
+    this.numIterations = data.numIterations;
+    this.regularization = data.regularization;
+  }
 }

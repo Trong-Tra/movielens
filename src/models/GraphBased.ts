@@ -161,4 +161,35 @@ export class GraphBasedModel implements RecommenderModel {
       }
     }
   }
+
+  serialize(): any {
+    const graphArray = Array.from(this.graph.entries()).map(([node, neighbors]) => [
+      node,
+      Array.from(neighbors.entries())
+    ]);
+
+    return {
+      graph: graphArray,
+      userNodes: Array.from(this.userNodes),
+      itemNodes: Array.from(this.itemNodes),
+      restartProb: this.restartProb,
+      numWalks: this.numWalks,
+      walkLength: this.walkLength
+    };
+  }
+
+  deserialize(data: any): void {
+    this.graph = new Map(
+      data.graph.map(([node, neighborsArray]: [string, [string, number][]]) => [
+        node,
+        new Map(neighborsArray)
+      ])
+    );
+    
+    this.userNodes = new Set(data.userNodes);
+    this.itemNodes = new Set(data.itemNodes);
+    this.restartProb = data.restartProb;
+    this.numWalks = data.numWalks;
+    this.walkLength = data.walkLength;
+  }
 }

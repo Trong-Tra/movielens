@@ -116,4 +116,16 @@ export class PopularityModel implements RecommenderModel {
 
     return recommendations;
   }
+
+  serialize(): any {
+    return {
+      itemScores: Array.from(this.itemScores.entries()),
+      sortedItems: this.sortedItems
+    };
+  }
+
+  deserialize(data: any): void {
+    this.itemScores = new Map(data.itemScores);
+    this.sortedItems = data.sortedItems;
+  }
 }

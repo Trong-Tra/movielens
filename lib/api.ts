@@ -32,10 +32,10 @@ export const searchMovies = async (query: string, limit: number = 20): Promise<M
 
 const getModelDescription = (name: string): string => {
   const descriptions: Record<string, string> = {
-    'popularity': 'Recommends the most popular movies overall',
-    'matrix-factorization': 'Uses collaborative filtering with latent factor models',
-    'item-item-cf': 'Recommends based on item similarity patterns',
-    'graph-based': 'Uses random walk on user-item graph',
+    'Popularity': 'Recommends the most popular movies overall',
+    'MatrixFactorization': 'Uses collaborative filtering with latent factor models (ALS)',
+    'ItemItemCF': 'Item-item collaborative filtering based on cosine similarity',
+    'GraphBased': 'Random walk with restart on user-item bipartite graph',
   };
   return descriptions[name] || 'Advanced recommendation algorithm';
 };

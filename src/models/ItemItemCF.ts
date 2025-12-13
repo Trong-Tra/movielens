@@ -172,4 +172,42 @@ export class ItemItemCF implements RecommenderModel {
     const denominator = Math.sqrt(normA) * Math.sqrt(normB);
     return denominator > 0 ? dotProduct / denominator : 0;
   }
+
+  serialize(): any {
+    const similaritiesArray = Array.from(this.itemSimilarities.entries()).map(([itemId, simMap]) => [
+      itemId,
+      Array.from(simMap.entries())
+    ]);
+    
+    const userItemsArray = Array.from(this.userItems.entries()).map(([userId, itemMap]) => [
+      userId,
+      Array.from(itemMap.entries())
+    ]);
+
+    return {
+      itemSimilarities: similaritiesArray,
+      userItems: userItemsArray,
+      allItems: Array.from(this.allItems),
+      topKSimilar: this.topKSimilar
+    };
+  }
+
+  deserialize(data: any): void {
+    this.itemSimilarities = new Map(
+      data.itemSimilarities.map(([itemId, simArray]: [number, [number, number][]]) => [
+        itemId,
+        new Map(simArray)
+      ])
+    );
+    
+    this.userItems = new Map(
+      data.userItems.map(([userId, itemArray]: [number, [number, number][]]) => [
+        userId,
+        new Map(itemArray)
+      ])
+    );
+    
+    this.allItems = new Set(data.allItems);
+    this.topKSimilar = data.topKSimilar;
+  }
 }

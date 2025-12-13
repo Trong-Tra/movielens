@@ -9,6 +9,7 @@ import {
 } from './models';
 import { Evaluator } from './evaluation';
 import { RecommendationAPI } from './serving';
+import { ModelPersistence } from './utils/ModelPersistence';
 
 dotenv.config();
 
@@ -18,7 +19,10 @@ async function main() {
 
   // Configuration
   const datasetPath = process.env.MOVIELENS_DATASET_PATH || './ml-1m';
-  const port = parseInt(process.env.PORT || '3000');
+  const port = parseInt(process.env.PORT || '3001');
+  const useCache = process.env.USE_MODEL_CACHE !== 'false';
+  
+  const persistence = new ModelPersistence();
 
   // Load dataset
   console.log(`📁 Loading dataset from: ${datasetPath}`);
@@ -49,61 +53,92 @@ async function main() {
     new GraphBasedModel(0.15, 50, 8)
   ];
 
-  // Train models
-  console.log('🔧 Training models...\n');
-  for (const model of models) {
-    console.log(`Training ${model.name}...`);
-    const startTime = Date.now();
-    model.fit(train);
-    const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
-    console.log(`✅ ${model.name} trained in ${elapsed}s\n`);
+  // Check if cached models exist
+  const modelNames = models.map(m => m.name);
+  const allCached = useCache && persistence.allModelsExist(modelNames);
+
+  if (allCached) {
+    console.log('📦 Found cached models, loading from disk...\n');
+    
+    // Load saved model data
+    for (const model of models) {
+      const savedData = persistence.loadModel(model.name);
+      if (savedData && savedData.modelData && (model as any).deserialize) {
+        (model as any).deserialize(savedData.modelData);
+        console.log(`✅ Loaded ${model.name} (trained ${new Date(savedData.timestamp).toLocaleString()})`);
+      }
+    }
+    
+    console.log('\n💡 To retrain: set USE_MODEL_CACHE=false or delete data/models/\n');
+  } else {
+    // Train models
+    console.log('🔧 Training models...\n');
+    for (const model of models) {
+      console.log(`Training ${model.name}...`);
+      const startTime = Date.now();
+      model.fit(train);
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+      console.log(`✅ ${model.name} trained in ${elapsed}s\n`);
+      
+      // Save trained model
+      if (useCache) {
+        persistence.saveModel(model, { 
+          trainSize: train.length,
+          trainedAt: new Date().toISOString() 
+        });
+      }
+    }
   }
 
-  // Evaluate models
-  console.log('📊 Evaluating models...\n');
-  const k = 10;
-  
-  for (const model of models) {
-    console.log(`Evaluating ${model.name}...`);
+  // Evaluate models (skip if using cache to speed up startup)
+  if (!allCached) {
+    console.log('📊 Evaluating models...\n');
+    const k = 10;
     
-    // Generate predictions for test users
-    const testUsers = new Set(test.map(t => t.userId));
-    const predictions = new Map();
+    for (const model of models) {
+      console.log(`Evaluating ${model.name}...`);
     
-    // Get items each user interacted with in training
-    const trainUserItems = new Map<number, Set<number>>();
-    for (const interaction of train) {
-      if (!trainUserItems.has(interaction.userId)) {
-        trainUserItems.set(interaction.userId, new Set());
-      }
-      trainUserItems.get(interaction.userId)!.add(interaction.itemId);
-    }
-    
-    let userCount = 0;
-    for (const userId of testUsers) {
-      const excludeItems = trainUserItems.get(userId) || new Set();
-      const recs = model.recommendTopN(userId, k, excludeItems);
-      if (recs.length > 0) {
-        predictions.set(userId, recs);
-        userCount++;
+      // Generate predictions for test users
+      const testUsers = new Set(test.map(t => t.userId));
+      const predictions = new Map();
+      
+      // Get items each user interacted with in training
+      const trainUserItems = new Map<number, Set<number>>();
+      for (const interaction of train) {
+        if (!trainUserItems.has(interaction.userId)) {
+          trainUserItems.set(interaction.userId, new Set());
+        }
+        trainUserItems.get(interaction.userId)!.add(interaction.itemId);
       }
       
-      // Progress indicator
-      if (userCount % 500 === 0) {
-        process.stdout.write(`  Processed ${userCount} users...\r`);
+      let userCount = 0;
+      for (const userId of testUsers) {
+        const excludeItems = trainUserItems.get(userId) || new Set();
+        const recs = model.recommendTopN(userId, k, excludeItems);
+        if (recs.length > 0) {
+          predictions.set(userId, recs);
+          userCount++;
+        }
+        
+        // Progress indicator
+        if (userCount % 500 === 0) {
+          process.stdout.write(`  Processed ${userCount} users...\r`);
+        }
       }
+      console.log(`  Processed ${userCount} users`);
+      
+      const metrics = Evaluator.evaluateModel(
+        predictions,
+        test,
+        k,
+        dataset.movies.size
+      );
+      
+      console.log(Evaluator.formatMetrics(metrics, k));
+      console.log('');
     }
-    console.log(`  Processed ${userCount} users`);
-    
-    const metrics = Evaluator.evaluateModel(
-      predictions,
-      test,
-      k,
-      dataset.movies.size
-    );
-    
-    console.log(Evaluator.formatMetrics(metrics, k));
-    console.log('');
+  } else {
+    console.log('⚡ Skipping evaluation (using cached models)\n');
   }
 
   // Start API server
