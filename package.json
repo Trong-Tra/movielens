@@ -16,7 +16,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^25.0.1",
