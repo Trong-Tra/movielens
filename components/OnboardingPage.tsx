@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { User, Movie } from '@/types';
 import { searchMovies } from '@/lib/api';
-import { FaStar, FaRedo, FaCheck } from 'react-icons/fa';
+import { FaStar, FaRedo, FaCheck, FaArrowLeft } from 'react-icons/fa';
+import Link from 'next/link';
 
 interface OnboardingPageProps {
   user: User;
@@ -92,6 +93,13 @@ export default function OnboardingPage({ user, onComplete }: OnboardingPageProps
       {/* Header */}
       <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-12 px-4">
         <div className="max-w-4xl mx-auto">
+          <Link 
+            href="/" 
+            className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4 transition-colors"
+          >
+            <FaArrowLeft />
+            Back to Explore
+          </Link>
           <h1 className="text-4xl font-bold mb-3">Rate Some Movies</h1>
           <p className="text-xl text-white/90 mb-8">
             Help us understand your taste by rating at least {REQUIRED_RATINGS} movies
