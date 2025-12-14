@@ -33,6 +33,25 @@ export class RecommendationAPI {
       res.json({ models });
     });
 
+    // Get next available user ID
+    this.app.get('/api/users/next-id', (req: Request, res: Response) => {
+      try {
+        if (!this.dataset) {
+          res.status(503).json({ error: 'Dataset not loaded' });
+          return;
+        }
+
+        // Find the highest user ID in the dataset
+        const maxUserId = Math.max(...Array.from(this.dataset.users));
+        const nextUserId = maxUserId + 1;
+
+        res.json({ nextUserId });
+      } catch (error) {
+        console.error('Error getting next user ID:', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    });
+
     // Get recommendations for a user
     this.app.get('/api/recommendations/:userId', (req: Request, res: Response) => {
       try {
@@ -232,6 +251,53 @@ export class RecommendationAPI {
         }
       } catch (error) {
         console.error('Error saving rating:', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    });
+
+    // TMDb movie search proxy
+    this.app.get('/api/tmdb/movie/:title', async (req: Request, res: Response) => {
+      try {
+        const title = decodeURIComponent(req.params.title);
+        const cleanTitle = title.replace(/\s*\(\d{4}\)\s*$/, '').trim();
+        
+        const tmdbApiKey = process.env.API_TMDb_KEY;
+        if (!tmdbApiKey) {
+          res.status(500).json({ error: 'TMDb API key not configured' });
+          return;
+        }
+
+        // Search for movie
+        const searchResponse = await fetch(
+          `https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodeURIComponent(cleanTitle)}&language=en-US&page=1`
+        );
+
+        if (!searchResponse.ok) {
+          res.status(searchResponse.status).json({ error: 'TMDb API error' });
+          return;
+        }
+
+        const searchData = await searchResponse.json();
+
+        if (searchData.results && searchData.results.length > 0) {
+          const movie = searchData.results[0];
+
+          // Fetch full details
+          const detailsResponse = await fetch(
+            `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${tmdbApiKey}&language=en-US`
+          );
+
+          if (detailsResponse.ok) {
+            const details = await detailsResponse.json();
+            res.json(details);
+          } else {
+            res.json(movie);
+          }
+        } else {
+          res.status(404).json({ error: 'Movie not found' });
+        }
+      } catch (error) {
+        console.error('Error fetching TMDb data:', error);
         res.status(500).json({ error: 'Internal server error' });
       }
     });

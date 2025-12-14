@@ -22,13 +22,19 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     loadPopularMovies();
-    generateNewUserId();
+    fetchNextUserId();
   }, []);
 
-  const generateNewUserId = () => {
-    // Generate a new user ID (6041+)
-    const newId = 6041 + Math.floor(Math.random() * 10000);
-    setNewUserId(newId);
+  const fetchNextUserId = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/users/next-id');
+      const data = await response.json();
+      setNewUserId(data.nextUserId);
+    } catch (error) {
+      console.error('Failed to fetch next user ID:', error);
+      // Fallback to 6041 if API fails
+      setNewUserId(6041);
+    }
   };
 
   const loadPopularMovies = async () => {

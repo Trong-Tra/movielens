@@ -6,6 +6,8 @@ import { getModels, getRecommendations, searchMovies } from '@/lib/api';
 import { FaRobot, FaSearch, FaStar, FaPlay, FaUser, FaRandom } from 'react-icons/fa';
 import Link from 'next/link';
 import { useUser } from '@/contexts/UserContext';
+import MovieCard from '@/components/MovieCard';
+import MovieDetailsModal from '@/components/MovieDetailsModal';
 
 export default function ExplorePage() {
   const { currentUserId, setCurrentUserId } = useUser();
@@ -19,6 +21,7 @@ export default function ExplorePage() {
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
   const [showUserModal, setShowUserModal] = useState(false);
   const [userIdInput, setUserIdInput] = useState('');
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
   useEffect(() => {
     loadModels();
@@ -231,34 +234,13 @@ export default function ExplorePage() {
         {!loading && !error && recommendations.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {recommendations.map((rec, index) => (
-              <div key={rec.movie.id} className="movie-card relative group">
-                {/* Rank Badge */}
-                <div className="absolute top-2 left-2 bg-[#e50914] text-white px-3 py-1 rounded font-bold text-sm z-10">
-                  #{index + 1}
-                </div>
-
-                <div className="aspect-[2/3] bg-[#2f2f2f] flex items-center justify-center p-4 relative overflow-hidden">
-                  <div className="text-center">
-                    <FaStar className="text-[#e50914] text-4xl mx-auto mb-2" />
-                    <p className="text-xs text-gray-500">Score</p>
-                    <p className="text-2xl font-bold text-white">{rec.score.toFixed(4)}</p>
-                  </div>
-                  
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-black bg-opacity-80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <FaPlay className="text-white text-3xl" />
-                  </div>
-                </div>
-
-                <div className="p-3">
-                  <h3 className="font-semibold text-sm mb-2 line-clamp-2">{rec.movie.title}</h3>
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {rec.movie.genres.slice(0, 3).map(genre => (
-                      <span key={genre} className="genre-tag text-xs">{genre}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              <MovieCard
+                key={rec.movie.id}
+                movie={rec.movie}
+                rank={index + 1}
+                score={rec.score}
+                onClick={() => setSelectedMovie(rec.movie)}
+              />
             ))}
           </div>
         )}
@@ -312,6 +294,14 @@ export default function ExplorePage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Movie Details Modal */}
+      {selectedMovie && (
+        <MovieDetailsModal
+          movie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
+        />
       )}
     </div>
   );
