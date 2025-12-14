@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react';
 import { Recommendation, ModelInfo, Movie } from '@/types';
 import { getModels, getRecommendations, searchMovies } from '@/lib/api';
-import { FaRobot, FaSearch, FaStar, FaRandom, FaPlay } from 'react-icons/fa';
+import { FaRobot, FaSearch, FaStar, FaPlay, FaUser, FaRandom } from 'react-icons/fa';
 import Link from 'next/link';
+import { useUser } from '@/contexts/UserContext';
 
 export default function ExplorePage() {
+  const { currentUserId, setCurrentUserId } = useUser();
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [selectedModel, setSelectedModel] = useState<string>('');
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -15,11 +17,11 @@ export default function ExplorePage() {
   const [topK, setTopK] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
-  const [currentUserId, setCurrentUserId] = useState<number>(1);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [userIdInput, setUserIdInput] = useState('');
 
   useEffect(() => {
     loadModels();
-    loadRandomUser();
   }, []);
 
   useEffect(() => {
@@ -31,9 +33,11 @@ export default function ExplorePage() {
   const loadModels = async () => {
     try {
       const availableModels = await getModels();
-      setModels(availableModels);
-      if (availableModels.length > 0) {
-        setSelectedModel(availableModels[0].name);
+      // Filter out Popularity model
+      const filteredModels = availableModels.filter(m => m.name !== 'Popularity');
+      setModels(filteredModels);
+      if (filteredModels.length > 0) {
+        setSelectedModel(filteredModels[0].name);
       }
     } catch (err) {
       setError('Failed to load models');
@@ -41,9 +45,13 @@ export default function ExplorePage() {
     }
   };
 
-  const loadRandomUser = () => {
-    const randomUserId = Math.floor(Math.random() * 6040) + 1;
-    setCurrentUserId(randomUserId);
+  const handleUserIdChange = () => {
+    const userId = parseInt(userIdInput);
+    if (userId >= 1 && userId <= 6040) {
+      setCurrentUserId(userId);
+      setShowUserModal(false);
+      setUserIdInput('');
+    }
   };
 
   const loadRecommendations = async () => {
@@ -97,11 +105,10 @@ export default function ExplorePage() {
               <span className="text-xl font-bold text-white">User #{currentUserId}</span>
             </div>
             <button
-              onClick={loadRandomUser}
-              className="btn btn-secondary flex items-center gap-2"
+              onClick={() => setShowUserModal(true)}
+              className="bg-[#2f2f2f] hover:bg-gray-700 border border-gray-800 text-white px-6 py-3 rounded font-semibold flex items-center gap-2 transition-colors"
             >
-              <FaRandom />
-              Random
+              <FaUser /> Not you?
             </button>
           </div>
         </div>
@@ -234,7 +241,7 @@ export default function ExplorePage() {
                   <div className="text-center">
                     <FaStar className="text-[#e50914] text-4xl mx-auto mb-2" />
                     <p className="text-xs text-gray-500">Score</p>
-                    <p className="text-2xl font-bold text-white">{rec.score.toFixed(1)}</p>
+                    <p className="text-2xl font-bold text-white">{rec.score.toFixed(4)}</p>
                   </div>
                   
                   {/* Hover overlay */}
@@ -256,6 +263,45 @@ export default function ExplorePage() {
           </div>
         )}
       </div>
+
+      {/* User ID Change Modal */}
+      {showUserModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4" onClick={() => setShowUserModal(false)}>
+          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-2xl font-bold text-white mb-4">Enter Your User ID</h2>
+            <p className="text-gray-400 mb-6">Enter a user ID between 1 and 6040</p>
+            
+            <input
+              type="number"
+              min="1"
+              max="6040"
+              value={userIdInput}
+              onChange={(e) => setUserIdInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleUserIdChange()}
+              placeholder="User ID (1-6040)"
+              className="w-full bg-[#2f2f2f] border border-gray-700 text-white px-4 py-3 rounded mb-4 focus:outline-none focus:border-[#e50914]"
+            />
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleUserIdChange}
+                className="flex-1 bg-[#e50914] hover:bg-[#f40612] text-white py-3 rounded font-semibold transition-colors"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={() => {
+                  setShowUserModal(false);
+                  setUserIdInput('');
+                }}
+                className="flex-1 bg-[#2f2f2f] hover:bg-gray-700 text-white py-3 rounded font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

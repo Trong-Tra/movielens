@@ -84,10 +84,10 @@ export class PopularityModel implements RecommenderModel {
       itemWeights.set(interaction.itemId, weight + interaction.weight);
     }
 
-    // Score = count * average rating
+    // Score = average rating
     for (const [itemId, count] of itemCounts) {
       const avgWeight = itemWeights.get(itemId)! / count;
-      this.itemScores.set(itemId, count * avgWeight);
+      this.itemScores.set(itemId, avgWeight);
     }
 
     // Sort items by score

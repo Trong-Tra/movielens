@@ -150,6 +150,91 @@ export class RecommendationAPI {
         res.status(500).json({ error: 'Internal server error' });
       }
     });
+
+    // Get user's rating for a movie
+    this.app.get('/api/ratings/:userId/:movieId', (req: Request, res: Response) => {
+      try {
+        const userId = parseInt(req.params.userId);
+        const movieId = parseInt(req.params.movieId);
+
+        if (isNaN(userId) || isNaN(movieId)) {
+          res.status(400).json({ error: 'Invalid user or movie ID' });
+          return;
+        }
+
+        if (!this.dataset) {
+          res.status(503).json({ error: 'Dataset not loaded' });
+          return;
+        }
+
+        // Find rating in dataset
+        const rating = this.dataset.interactions.find(
+          i => i.userId === userId && i.itemId === movieId
+        );
+
+        if (!rating) {
+          res.json({ rated: false });
+          return;
+        }
+
+        res.json({
+          rated: true,
+          rating: rating.weight,
+          timestamp: rating.timestamp
+        });
+      } catch (error) {
+        console.error('Error fetching rating:', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    });
+
+    // Add or update a rating
+    this.app.post('/api/ratings', (req: Request, res: Response) => {
+      try {
+        const { userId, movieId, rating } = req.body;
+
+        if (!userId || !movieId || !rating) {
+          res.status(400).json({ error: 'Missing required fields: userId, movieId, rating' });
+          return;
+        }
+
+        if (rating < 1 || rating > 5) {
+          res.status(400).json({ error: 'Rating must be between 1 and 5' });
+          return;
+        }
+
+        if (!this.dataset) {
+          res.status(503).json({ error: 'Dataset not loaded' });
+          return;
+        }
+
+        // Find existing rating
+        const existingIndex = this.dataset.interactions.findIndex(
+          i => i.userId === userId && i.itemId === movieId
+        );
+
+        const timestamp = Date.now();
+
+        if (existingIndex >= 0) {
+          // Update existing rating
+          this.dataset.interactions[existingIndex].weight = rating;
+          this.dataset.interactions[existingIndex].timestamp = timestamp;
+          res.json({ success: true, action: 'updated', rating });
+        } else {
+          // Add new rating
+          this.dataset.interactions.push({
+            userId,
+            itemId: movieId,
+            weight: rating,
+            timestamp
+          });
+          res.json({ success: true, action: 'added', rating });
+        }
+      } catch (error) {
+        console.error('Error saving rating:', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    });
   }
 
   registerModel(model: RecommenderModel): void {

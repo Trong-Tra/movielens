@@ -30,17 +30,29 @@ export default function Navbar() {
                   : 'text-gray-300 hover:text-gray-100'
               }`}
             >
-              Explore
+              My Recommendations
             </Link>
 
             <Link
-              href="/create"
-              className={`flex items-center space-x-2 px-4 py-2 rounded bg-[#e50914] hover:bg-[#f40612] transition-colors ${
-                isActive('/create') ? 'font-bold' : ''
+              href="/featured"
+              className={`text-sm font-medium transition-colors ${
+                isActive('/featured') 
+                  ? 'text-white font-bold' 
+                  : 'text-gray-300 hover:text-gray-100'
               }`}
             >
-              <FaPlay className="text-xs" />
-              <span className="text-sm font-semibold">Try It</span>
+              Featured
+            </Link>
+
+            <Link
+              href="/browse-others"
+              className={`text-sm font-medium transition-colors ${
+                isActive('/browse-others') 
+                  ? 'text-white font-bold' 
+                  : 'text-gray-300 hover:text-gray-100'
+              }`}
+            >
+              Browse Others
             </Link>
           </div>
         </div>
