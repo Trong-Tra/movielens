@@ -282,7 +282,7 @@ export default function ExplorePage() {
               className="w-full bg-[#2f2f2f] border border-gray-700 text-white px-4 py-3 rounded mb-4 focus:outline-none focus:border-[#e50914]"
             />
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 mb-6">
               <button
                 onClick={handleUserIdChange}
                 className="flex-1 bg-[#e50914] hover:bg-[#f40612] text-white py-3 rounded font-semibold transition-colors"
@@ -298,6 +298,17 @@ export default function ExplorePage() {
               >
                 Cancel
               </button>
+            </div>
+
+            <div className="border-t border-gray-800 pt-6">
+              <p className="text-gray-400 text-center mb-4">Haven't have a profile?</p>
+              <Link href="/get-started">
+                <button
+                  className="w-full bg-[#141414] hover:bg-[#1f1f1f] border-2 border-[#e50914] text-white py-3 rounded font-semibold transition-colors"
+                >
+                  Get My Recommended Movies
+                </button>
+              </Link>
             </div>
           </div>
         </div>

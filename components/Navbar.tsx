@@ -54,6 +54,16 @@ export default function Navbar() {
             >
               Browse Others
             </Link>
+
+            <Link
+              href="/get-started"
+              className={`flex items-center space-x-2 px-4 py-2 rounded bg-[#e50914] hover:bg-[#f40612] transition-colors ${
+                isActive('/get-started') ? 'font-bold' : ''
+              }`}
+            >
+              <FaPlay className="text-xs" />
+              <span className="text-sm font-semibold">Get Started</span>
+            </Link>
           </div>
         </div>
       </div>
