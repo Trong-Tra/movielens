@@ -1,22 +1,55 @@
+# Dependencies
 node_modules/
+
+# Build outputs
 dist/
+.next/
+out/
+
+# Logs
 *.log
+backend.log
+frontend.log
+server.log
+nohup.out
+
+# Environment variables
 .env
+.env.local
+.env.*.local
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# TypeScript
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Testing
+coverage/
+
+# Data files (large datasets)
 data/*.csv
 data/*.zip
 data/*.dat
 data/ml-*
+ml-1m/
+
+# Trained models (regenerated on server start)
 data/models/
-.vscode/
-coverage/
-*.swp
 
 # Next.js
-.next/
-out/
 next-env.d.ts
 
-# Old Vite files (archived)
-client/
-vite.config.ts
+# Temporary project docs (not needed in repo)
+execution-prompt.md
+project-context.md
+tech-stack.md
