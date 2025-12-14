@@ -30,7 +30,7 @@ export default function OnboardingPage() {
 
   const fetchNextUserId = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/users/next-id');
+      const response = await fetch('/api/users/next-id');
       const data = await response.json();
       setNewUserId(data.nextUserId);
     } catch (error) {
@@ -44,7 +44,7 @@ export default function OnboardingPage() {
     try {
       setLoading(true);
       // Get popular movies using Popularity model
-      const response = await fetch('http://localhost:3001/api/recommendations/1?model=Popularity&n=50');
+      const response = await fetch('/api/recommendations/1?model=Popularity&n=50');
       const data = await response.json();
       
       const movieList = data.recommendations.map((rec: any) => ({
@@ -88,9 +88,9 @@ export default function OnboardingPage() {
     setSubmitting(true);
     
     try {
-      // Submit all ratings to backend
+      // Submit all ratings to backend via Next.js proxy
       for (const [movieId, rating] of ratings) {
-        await fetch('http://localhost:3001/api/ratings', {
+        await fetch('/api/ratings', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

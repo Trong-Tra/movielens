@@ -35,7 +35,7 @@ export default function FeaturedMoviesPage() {
       setLoading(true);
       // Get recommendations using Popularity model for a random user
       // This gives us the highest-rated movies
-      const response = await fetch(`http://localhost:3001/api/recommendations/1?model=Popularity&n=50`);
+      const response = await fetch(`/api/recommendations/1?model=Popularity&n=50`);
       const data = await response.json();
       
       const ranked = data.recommendations.map((rec: any, index: number) => ({
@@ -56,7 +56,7 @@ export default function FeaturedMoviesPage() {
 
   const loadUserRating = async (movieId: number) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/ratings/${currentUserId}/${movieId}`);
+      const response = await fetch(`/api/ratings/${currentUserId}/${movieId}`);
       const data = await response.json();
       
       if (data.rated) {
@@ -74,7 +74,7 @@ export default function FeaturedMoviesPage() {
     if (!selectedMovie) return;
 
     try {
-      const response = await fetch('http://localhost:3001/api/ratings', {
+      const response = await fetch('/api/ratings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
