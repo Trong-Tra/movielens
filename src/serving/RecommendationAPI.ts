@@ -70,6 +70,14 @@ export class RecommendationAPI {
           return;
         }
 
+        // For ItemItemCF, inject live interactions to support new users
+        if (model === 'ItemItemCF' && this.dataset) {
+          const itemItemCF = recommender as any;
+          if (itemItemCF.setLiveInteractions) {
+            itemItemCF.setLiveInteractions(this.dataset.interactions);
+          }
+        }
+
         // Get items to exclude (user's training items)
         const excludeItems = this.trainedInteractions.get(userId) || new Set();
         

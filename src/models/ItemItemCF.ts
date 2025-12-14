@@ -10,9 +10,17 @@ export class ItemItemCF implements RecommenderModel {
   private userItems: Map<number, Map<number, number>> = new Map();
   private allItems: Set<number> = new Set();
   private topKSimilar: number;
+  private liveInteractions: Interaction[] = [];
 
   constructor(topKSimilar: number = 50) {
     this.topKSimilar = topKSimilar;
+  }
+
+  /**
+   * Set live interactions for handling new users not in training data
+   */
+  setLiveInteractions(interactions: Interaction[]): void {
+    this.liveInteractions = interactions;
   }
 
   fit(data: Interaction[]): void {
@@ -115,8 +123,19 @@ export class ItemItemCF implements RecommenderModel {
   }
 
   recommendTopN(userId: number, n: number, excludeItems: Set<number> = new Set()): Recommendation[] {
-    const userRatings = this.userItems.get(userId);
-    if (!userRatings) return [];
+    let userRatings = this.userItems.get(userId);
+    
+    // If user not in training data, get ratings from live interactions (new user)
+    if (!userRatings && this.liveInteractions.length > 0) {
+      userRatings = new Map();
+      for (const interaction of this.liveInteractions) {
+        if (interaction.userId === userId) {
+          userRatings.set(interaction.itemId, interaction.weight);
+        }
+      }
+    }
+    
+    if (!userRatings || userRatings.size === 0) return [];
 
     const scores = new Map<number, number>();
 
