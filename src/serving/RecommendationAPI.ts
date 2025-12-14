@@ -70,11 +70,11 @@ export class RecommendationAPI {
           return;
         }
 
-        // For ItemItemCF, inject live interactions to support new users
-        if (model === 'ItemItemCF' && this.dataset) {
-          const itemItemCF = recommender as any;
-          if (itemItemCF.setLiveInteractions) {
-            itemItemCF.setLiveInteractions(this.dataset.interactions);
+        // Inject live interactions to support new users for all models
+        if (this.dataset) {
+          const modelWithLive = recommender as any;
+          if (modelWithLive.setLiveInteractions) {
+            modelWithLive.setLiveInteractions(this.dataset.interactions);
           }
         }
 

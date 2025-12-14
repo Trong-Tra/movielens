@@ -14,6 +14,7 @@ export class MatrixFactorizationModel implements RecommenderModel {
   private numFactors: number;
   private numIterations: number;
   private regularization: number;
+  private liveInteractions: Interaction[] = [];
 
   constructor(
     numFactors: number = 30,
@@ -23,6 +24,13 @@ export class MatrixFactorizationModel implements RecommenderModel {
     this.numFactors = numFactors;
     this.numIterations = numIterations;
     this.regularization = regularization;
+  }
+
+  /**
+   * Set live interactions for handling new users not in training data
+   */
+  setLiveInteractions(interactions: Interaction[]): void {
+    this.liveInteractions = interactions;
   }
 
   fit(data: Interaction[]): void {
@@ -97,7 +105,40 @@ export class MatrixFactorizationModel implements RecommenderModel {
   }
 
   recommendTopN(userId: number, n: number, excludeItems: Set<number> = new Set()): Recommendation[] {
-    const userFactor = this.userFactors.get(userId);
+    let userFactor = this.userFactors.get(userId);
+    
+    // If user not in training data, compute factor from their ratings (new user)
+    if (!userFactor && this.liveInteractions.length > 0) {
+      const userRatings = new Map<number, number>();
+      for (const interaction of this.liveInteractions) {
+        if (interaction.userId === userId) {
+          userRatings.set(interaction.itemId, interaction.weight);
+        }
+      }
+      
+      if (userRatings.size > 0) {
+        // Compute user factor as weighted average of rated item factors
+        userFactor = Array(this.numFactors).fill(0);
+        let totalWeight = 0;
+        
+        for (const [itemId, rating] of userRatings) {
+          const itemFactor = this.itemFactors.get(itemId);
+          if (itemFactor) {
+            for (let i = 0; i < this.numFactors; i++) {
+              userFactor[i] += itemFactor[i] * rating;
+            }
+            totalWeight += rating;
+          }
+        }
+        
+        if (totalWeight > 0) {
+          for (let i = 0; i < this.numFactors; i++) {
+            userFactor[i] /= totalWeight;
+          }
+        }
+      }
+    }
+    
     if (!userFactor) return [];
 
     const scores: Array<{ itemId: number; score: number }> = [];

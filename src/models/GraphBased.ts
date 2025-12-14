@@ -13,6 +13,7 @@ export class GraphBasedModel implements RecommenderModel {
   private restartProb: number;
   private numWalks: number;
   private walkLength: number;
+  private liveInteractions: Interaction[] = [];
 
   constructor(
     restartProb: number = 0.15,
@@ -22,6 +23,13 @@ export class GraphBasedModel implements RecommenderModel {
     this.restartProb = restartProb;
     this.numWalks = numWalks;
     this.walkLength = walkLength;
+  }
+
+  /**
+   * Set live interactions for handling new users not in training data
+   */
+  setLiveInteractions(interactions: Interaction[]): void {
+    this.liveInteractions = interactions;
   }
 
   fit(data: Interaction[]): void {
@@ -69,6 +77,28 @@ export class GraphBasedModel implements RecommenderModel {
 
   recommendTopN(userId: number, n: number, excludeItems: Set<number> = new Set()): Recommendation[] {
     const userNode = `u_${userId}`;
+    
+    // If user not in graph, try to build temporary edges from live interactions (new user)
+    if (!this.graph.has(userNode) && this.liveInteractions.length > 0) {
+      const userRatings = this.liveInteractions.filter(i => i.userId === userId);
+      
+      if (userRatings.length > 0) {
+        // Temporarily add user to graph
+        this.graph.set(userNode, new Map());
+        
+        for (const interaction of userRatings) {
+          const itemNode = `i_${interaction.itemId}`;
+          if (this.graph.has(itemNode)) {
+            // Add edges
+            this.graph.get(userNode)!.set(itemNode, interaction.weight);
+            this.graph.get(itemNode)!.set(userNode, interaction.weight);
+          }
+        }
+        
+        // Normalize new edges
+        this.normalizeNode(userNode);
+      }
+    }
     
     if (!this.graph.has(userNode)) {
       return [];
@@ -152,12 +182,19 @@ export class GraphBasedModel implements RecommenderModel {
 
   private normalizeGraph(): void {
     for (const [node, neighbors] of this.graph) {
-      const totalWeight = Array.from(neighbors.values()).reduce((a, b) => a + b, 0);
-      
-      if (totalWeight > 0) {
-        for (const [neighbor, weight] of neighbors) {
-          neighbors.set(neighbor, weight / totalWeight);
-        }
+      this.normalizeNode(node);
+    }
+  }
+
+  private normalizeNode(node: string): void {
+    const neighbors = this.graph.get(node);
+    if (!neighbors) return;
+    
+    const totalWeight = Array.from(neighbors.values()).reduce((a, b) => a + b, 0);
+    
+    if (totalWeight > 0) {
+      for (const [neighbor, weight] of neighbors) {
+        neighbors.set(neighbor, weight / totalWeight);
       }
     }
   }
