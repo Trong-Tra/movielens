@@ -185,25 +185,14 @@ export default function ExplorePage() {
         {/* Search Results */}
         {searchResults.length > 0 && (
           <div className="mb-8">
-            <h3 className="text-xl font-bold mb-4">Search Results</h3>
+            <h3 className="text-xl font-bold mb-4">Search Results ({searchResults.length})</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {searchResults.map(movie => (
-                <div key={movie.id} className="movie-card">
-                  <div className="aspect-[2/3] bg-[#2f2f2f] flex items-center justify-center p-4">
-                    <div className="text-center">
-                      <FaStar className="text-[#e50914] text-3xl mx-auto mb-2" />
-                      <p className="text-xs text-gray-400">Movie #{movie.id}</p>
-                    </div>
-                  </div>
-                  <div className="p-3">
-                    <h4 className="font-semibold text-sm mb-2 line-clamp-2">{movie.title}</h4>
-                    <div className="flex flex-wrap gap-1">
-                      {movie.genres.slice(0, 2).map(genre => (
-                        <span key={genre} className="genre-tag text-xs">{genre}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                <MovieCard
+                  key={movie.id}
+                  movie={movie}
+                  onClick={() => setSelectedMovie(movie)}
+                />
               ))}
             </div>
           </div>

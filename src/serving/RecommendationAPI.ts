@@ -277,7 +277,7 @@ export class RecommendationAPI {
           return;
         }
 
-        const searchData = await searchResponse.json();
+        const searchData: any = await searchResponse.json();
 
         if (searchData.results && searchData.results.length > 0) {
           const movie = searchData.results[0];
@@ -288,7 +288,7 @@ export class RecommendationAPI {
           );
 
           if (detailsResponse.ok) {
-            const details = await detailsResponse.json();
+            const details: any = await detailsResponse.json();
             res.json(details);
           } else {
             res.json(movie);

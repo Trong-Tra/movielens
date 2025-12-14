@@ -26,10 +26,14 @@ export default function MovieCard({ movie, rank, score, onClick }: MovieCardProp
         const data = await response.json();
         if (data.poster_path) {
           setPosterUrl(`https://image.tmdb.org/t/p/w342${data.poster_path}`);
+        } else {
+          console.log(`No poster found for: ${movie.title}`);
         }
+      } else {
+        console.error(`Failed to fetch poster for ${movie.title}: ${response.status}`);
       }
     } catch (error) {
-      console.error('Failed to fetch poster:', error);
+      console.error(`Error fetching poster for ${movie.title}:`, error);
     } finally {
       setLoading(false);
     }
