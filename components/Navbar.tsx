@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FaFilm, FaCompass, FaRocket } from 'react-icons/fa';
+import { FaPlay } from 'react-icons/fa';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -12,39 +12,35 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-black bg-opacity-95">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo/Brand */}
-          <Link href="/" className="flex items-center space-x-2 text-xl font-bold hover:opacity-80 transition-opacity">
-            <FaFilm className="text-2xl" />
-            <span>MovieLens Recommender</span>
+          {/* Logo/Brand - Netflix style */}
+          <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+            <span className="text-[#e50914] text-3xl font-black tracking-tighter">MOVIELENS</span>
           </Link>
 
-          {/* Navigation Links */}
-          <div className="flex items-center space-x-6">
+          {/* Navigation Links - Netflix style */}
+          <div className="flex items-center space-x-8">
             <Link
               href="/"
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
+              className={`text-sm font-medium transition-colors ${
                 isActive('/') 
-                  ? 'bg-white bg-opacity-20 font-semibold' 
-                  : 'hover:bg-white hover:bg-opacity-10'
+                  ? 'text-white font-bold' 
+                  : 'text-gray-300 hover:text-gray-100'
               }`}
             >
-              <FaCompass />
-              <span>Explore</span>
+              Explore
             </Link>
 
             <Link
               href="/create"
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
-                isActive('/create') 
-                  ? 'bg-white bg-opacity-20 font-semibold' 
-                  : 'hover:bg-white hover:bg-opacity-10'
+              className={`flex items-center space-x-2 px-4 py-2 rounded bg-[#e50914] hover:bg-[#f40612] transition-colors ${
+                isActive('/create') ? 'font-bold' : ''
               }`}
             >
-              <FaRocket />
-              <span>Try It Yourself</span>
+              <FaPlay className="text-xs" />
+              <span className="text-sm font-semibold">Try It</span>
             </Link>
           </div>
         </div>

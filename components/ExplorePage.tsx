@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Recommendation, ModelInfo, Movie } from '@/types';
 import { getModels, getRecommendations, searchMovies } from '@/lib/api';
-import { FaRobot, FaChartLine, FaSearch, FaStar, FaUserPlus, FaRandom } from 'react-icons/fa';
+import { FaRobot, FaSearch, FaStar, FaRandom, FaPlay } from 'react-icons/fa';
 import Link from 'next/link';
 
 export default function ExplorePage() {
@@ -80,54 +80,46 @@ export default function ExplorePage() {
   const currentModel = models.find(m => m.name === selectedModel);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Header */}
-      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-5xl md:text-6xl font-bold mb-4">Movie Recommendation System</h1>
-            <p className="text-xl text-white/90 mb-6">
-              Explore personalized recommendations powered by multiple AI algorithms
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <Link href="/create" className="btn btn-secondary bg-white text-indigo-600 hover:bg-gray-100 flex items-center gap-2">
-                <FaUserPlus />
-                Try It Yourself
-              </Link>
-              <button
-                onClick={loadRandomUser}
-                className="btn bg-white/20 text-white border-2 border-white hover:bg-white hover:text-indigo-600 flex items-center gap-2"
-              >
-                <FaRandom />
-                Random User
-              </button>
-            </div>
-          </div>
+    <div className="min-h-screen bg-[#141414]">
+      {/* Hero Section */}
+      <div className="relative bg-gradient-to-b from-black via-[#141414] to-[#141414] py-20 px-4 mb-8">
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="text-6xl md:text-7xl font-black mb-6 tracking-tight">
+            Discover <span className="text-[#e50914]">Movies</span>
+          </h1>
+          <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+            AI-powered recommendations based on 1M real ratings
+          </p>
           
-          <div className="text-center">
-            <p className="text-lg text-white/80 mb-2">
-              Currently viewing recommendations for
-            </p>
-            <div className="inline-block bg-white/20 backdrop-blur rounded-lg px-6 py-3">
-              <span className="text-2xl font-bold">User #{currentUserId}</span>
+          <div className="flex items-center justify-center gap-4 mb-8">
+            <div className="bg-[#1a1a1a] border border-gray-800 rounded px-6 py-3">
+              <span className="text-gray-500 text-sm">Viewing: </span>
+              <span className="text-xl font-bold text-white">User #{currentUserId}</span>
             </div>
+            <button
+              onClick={loadRandomUser}
+              className="btn btn-secondary flex items-center gap-2"
+            >
+              <FaRandom />
+              Random
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="bg-white border-b border-gray-200 py-8 px-4 shadow-sm">
-        <div className="max-w-7xl mx-auto space-y-6">
+      {/* Controls Section */}
+      <div className="max-w-7xl mx-auto px-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Model Selector */}
-          <div>
-            <label className="flex items-center gap-2 text-lg font-semibold text-gray-700 mb-3">
-              <FaRobot className="text-indigo-500" />
-              Recommendation Model
+          <div className="md:col-span-2">
+            <label className="flex items-center gap-2 text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">
+              <FaRobot className="text-[#e50914]" />
+              Algorithm
             </label>
             <select
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
-              className="max-w-md w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition-colors bg-white text-lg"
+              className="w-full px-4 py-3 border border-gray-800 rounded bg-[#1a1a1a] text-white focus:border-[#e50914] focus:outline-none transition-colors"
             >
               {models.map(model => (
                 <option key={model.name} value={model.name}>
@@ -136,169 +128,133 @@ export default function ExplorePage() {
               ))}
             </select>
             {currentModel && (
-              <p className="mt-2 text-gray-600">{currentModel.description}</p>
+              <p className="mt-2 text-sm text-gray-500">{currentModel.description}</p>
             )}
           </div>
 
           {/* Top-K Selector */}
           <div>
-            <label className="flex items-center gap-2 text-lg font-semibold text-gray-700 mb-3">
-              <FaChartLine className="text-indigo-500" />
-              Number of Recommendations
+            <label className="flex items-center gap-2 text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">
+              Results
             </label>
-            <div className="flex items-center gap-4 max-w-md">
+            <div className="flex items-center gap-4 bg-[#1a1a1a] border border-gray-800 rounded px-4 py-3">
               <input
                 type="range"
                 min="5"
-                max="50"
-                step="5"
+                max="20"
                 value={topK}
                 onChange={(e) => setTopK(parseInt(e.target.value))}
-                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                className="flex-1 accent-[#e50914]"
               />
-              <span className="text-2xl font-bold text-indigo-600 min-w-[50px] text-center">
-                {topK}
-              </span>
-            </div>
-          </div>
-
-          {/* Search */}
-          <div>
-            <label className="flex items-center gap-2 text-lg font-semibold text-gray-700 mb-3">
-              <FaSearch className="text-indigo-500" />
-              Search Movies
-            </label>
-            <div className="flex gap-3 max-w-2xl">
-              <input
-                type="text"
-                placeholder="Search for movies..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition-colors"
-              />
-              <button onClick={handleSearch} className="btn btn-secondary">
-                Search
-              </button>
+              <span className="text-xl font-bold text-[#e50914] min-w-[3rem] text-center">{topK}</span>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto py-12 px-4">
+        {/* Search */}
+        <div className="mb-8">
+          <label className="flex items-center gap-2 text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">
+            <FaSearch className="text-[#e50914]" />
+            Search Movies
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              placeholder="Search for a movie..."
+              className="flex-1 px-4 py-3 border border-gray-800 rounded bg-[#1a1a1a] text-white placeholder-gray-600 focus:border-[#e50914] focus:outline-none transition-colors"
+            />
+            <button onClick={handleSearch} className="btn btn-primary px-8">
+              Search
+            </button>
+          </div>
+        </div>
+
         {/* Search Results */}
         {searchResults.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Search Results</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="mb-8">
+            <h3 className="text-xl font-bold mb-4">Search Results</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {searchResults.map(movie => (
-                <div key={movie.id} className="card p-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">{movie.title}</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {movie.genres.map(genre => (
-                      <span key={genre} className="genre-tag">{genre}</span>
-                    ))}
+                <div key={movie.id} className="movie-card">
+                  <div className="aspect-[2/3] bg-[#2f2f2f] flex items-center justify-center p-4">
+                    <div className="text-center">
+                      <FaStar className="text-[#e50914] text-3xl mx-auto mb-2" />
+                      <p className="text-xs text-gray-400">Movie #{movie.id}</p>
+                    </div>
+                  </div>
+                  <div className="p-3">
+                    <h4 className="font-semibold text-sm mb-2 line-clamp-2">{movie.title}</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {movie.genres.slice(0, 2).map(genre => (
+                        <span key={genre} className="genre-tag text-xs">{genre}</span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         )}
+      </div>
 
-        {/* Recommendations */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">
-            Recommendations for User #{currentUserId}
-            {selectedModel && ` • ${selectedModel}`}
-          </h2>
+      {/* Recommendations Section */}
+      <div className="max-w-7xl mx-auto px-4 pb-12">
+        <h2 className="text-2xl font-bold mb-6">
+          Recommended for User #{currentUserId}
+        </h2>
 
-          {loading && (
-            <div className="flex flex-col items-center justify-center py-16">
-              <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-              <p className="text-gray-600 text-lg">Loading recommendations...</p>
-            </div>
-          )}
+        {loading && (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#e50914]"></div>
+          </div>
+        )}
 
-          {error && (
-            <div className="text-center py-16">
-              <p className="text-red-600 text-xl mb-4">{error}</p>
-              <button onClick={loadRecommendations} className="btn btn-primary">
-                Retry
-              </button>
-            </div>
-          )}
+        {error && (
+          <div className="text-center py-16">
+            <p className="text-red-500 text-xl mb-4">{error}</p>
+            <button onClick={loadRecommendations} className="btn btn-primary">
+              Retry
+            </button>
+          </div>
+        )}
 
-          {!loading && !error && recommendations.length === 0 && (
-            <div className="text-center py-16">
-              <p className="text-gray-500 text-xl">No recommendations available</p>
-            </div>
-          )}
+        {!loading && !error && recommendations.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {recommendations.map((rec, index) => (
+              <div key={rec.movie.id} className="movie-card relative group">
+                {/* Rank Badge */}
+                <div className="absolute top-2 left-2 bg-[#e50914] text-white px-3 py-1 rounded font-bold text-sm z-10">
+                  #{index + 1}
+                </div>
 
-          {!loading && !error && recommendations.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recommendations.map((rec, index) => (
-                <div key={rec.movie.id} className="card p-6 relative overflow-hidden">
-                  {/* Rank Badge */}
-                  <div className="absolute top-0 right-0 bg-indigo-500 text-white px-4 py-2 rounded-bl-xl font-bold text-lg">
-                    #{index + 1}
+                <div className="aspect-[2/3] bg-[#2f2f2f] flex items-center justify-center p-4 relative overflow-hidden">
+                  <div className="text-center">
+                    <FaStar className="text-[#e50914] text-4xl mx-auto mb-2" />
+                    <p className="text-xs text-gray-500">Score</p>
+                    <p className="text-2xl font-bold text-white">{rec.score.toFixed(1)}</p>
                   </div>
-
-                  <div className="pr-12 mb-4">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                      {rec.movie.title}
-                    </h3>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {rec.movie.genres.map(genre => (
-                        <span key={genre} className="genre-tag">{genre}</span>
-                      ))}
-                    </div>
-                    <div className="bg-gray-100 rounded-lg px-3 py-2 text-sm">
-                      <span className="text-gray-600">Score: </span>
-                      <span className="font-bold text-indigo-600">{rec.score.toFixed(3)}</span>
-                    </div>
+                  
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 bg-black bg-opacity-80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <FaPlay className="text-white text-3xl" />
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
 
-        {/* Features */}
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-8 mb-12">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-            How It Works
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaRobot className="text-3xl text-white" />
+                <div className="p-3">
+                  <h3 className="font-semibold text-sm mb-2 line-clamp-2">{rec.movie.title}</h3>
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {rec.movie.genres.slice(0, 3).map(genre => (
+                      <span key={genre} className="genre-tag text-xs">{genre}</span>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Multiple Algorithms</h3>
-              <p className="text-gray-600">
-                Choose from popularity, collaborative filtering, matrix factorization, and graph-based models
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaChartLine className="text-3xl text-white" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Real Data</h3>
-              <p className="text-gray-600">
-                Based on 1M ratings from 6,040 users on 3,883 movies from MovieLens
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaUserPlus className="text-3xl text-white" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Try It Yourself</h3>
-              <p className="text-gray-600">
-                Rate some movies and get personalized recommendations tailored to your taste
-              </p>
-            </div>
+            ))}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
