@@ -5,20 +5,23 @@ import { Movie } from '@/types';
 import { FaStar, FaArrowRight, FaCheck } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/contexts/UserContext';
+import MovieCard from '@/components/MovieCard';
+import MovieDetailsModal from '@/components/MovieDetailsModal';
 
 export default function OnboardingPage() {
   const router = useRouter();
   const { setCurrentUserId } = useUser();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
   const [ratings, setRatings] = useState<Map<number, number>>(new Map());
-  const [hoverRating, setHoverRating] = useState<number>(0);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [newUserId, setNewUserId] = useState<number>(0);
   const [submitting, setSubmitting] = useState(false);
   const [step, setStep] = useState<'intro' | 'rating' | 'complete'>('intro');
 
   const MIN_RATINGS = 10;
+  const MOVIES_PER_PAGE = 5;
 
   useEffect(() => {
     loadPopularMovies();
@@ -58,25 +61,24 @@ export default function OnboardingPage() {
     }
   };
 
-  const handleRating = (rating: number) => {
-    const currentMovie = movies[currentIndex];
+  const handleRating = (movieId: number, rating: number) => {
     const newRatings = new Map(ratings);
-    newRatings.set(currentMovie.id, rating);
+    newRatings.set(movieId, rating);
     setRatings(newRatings);
-    
-    // Move to next movie after short delay
-    setTimeout(() => {
-      if (currentIndex < movies.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-        setHoverRating(0);
-      }
-    }, 300);
+    setSelectedMovie(null);
   };
 
-  const handleSkip = () => {
-    if (currentIndex < movies.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setHoverRating(0);
+  const handleNext = () => {
+    const nextPage = currentPage + 1;
+    const maxPage = Math.ceil(movies.length / MOVIES_PER_PAGE) - 1;
+    if (nextPage <= maxPage) {
+      setCurrentPage(nextPage);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
     }
   };
 
@@ -115,8 +117,13 @@ export default function OnboardingPage() {
     router.push('/');
   };
 
-  const currentMovie = movies[currentIndex];
+  const startIndex = currentPage * MOVIES_PER_PAGE;
+  const endIndex = Math.min(startIndex + MOVIES_PER_PAGE, movies.length);
+  const currentMovies = movies.slice(startIndex, endIndex);
   const progress = (ratings.size / MIN_RATINGS) * 100;
+  const totalPages = Math.ceil(movies.length / MOVIES_PER_PAGE);
+  const hasNext = currentPage < totalPages - 1;
+  const hasPrevious = currentPage > 0;
 
   if (loading) {
     return (
@@ -198,14 +205,14 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen bg-[#141414]">
       {/* Progress Bar */}
-      <div className="fixed top-16 left-0 right-0 bg-[#1a1a1a] border-b border-gray-800 z-40">
+      <div className="fixed top-0 left-0 right-0 bg-[#1a1a1a] border-b border-gray-800 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm text-gray-400">
               Progress: {ratings.size} / {MIN_RATINGS} movies rated
             </div>
             <div className="text-sm text-gray-400">
-              Movie {currentIndex + 1} / {movies.length}
+              Page {currentPage + 1} / {totalPages}
             </div>
           </div>
           <div className="w-full bg-[#2f2f2f] rounded-full h-2 overflow-hidden">
@@ -218,71 +225,65 @@ export default function OnboardingPage() {
       </div>
 
       {/* Rating Interface */}
-      <div className="pt-32 pb-12 px-4">
-        <div className="max-w-2xl mx-auto">
-          {currentMovie && (
-            <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-8">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                  {currentMovie.title}
-                </h2>
-                <div className="flex flex-wrap gap-2 justify-center mb-6">
-                  {currentMovie.genres.map(genre => (
-                    <span key={genre} className="bg-[#2f2f2f] px-3 py-1 rounded text-sm text-gray-400">
-                      {genre}
-                    </span>
-                  ))}
-                </div>
-              </div>
+      <div className="pt-24 pb-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-8">
+            <p className="text-gray-400 text-lg">Click on a movie to view details and rate it</p>
+          </div>
 
-              <div className="text-center mb-6">
-                <p className="text-gray-400 mb-4">How would you rate this movie?</p>
-                <div className="flex items-center justify-center gap-3">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      onClick={() => handleRating(star)}
-                      onMouseEnter={() => setHoverRating(star)}
-                      onMouseLeave={() => setHoverRating(0)}
-                      className="transition-transform hover:scale-125"
-                    >
-                      <FaStar
-                        className={`text-5xl ${
-                          star <= (hoverRating || (ratings.get(currentMovie.id) || 0))
-                            ? 'text-[#e50914]'
-                            : 'text-gray-600'
-                        }`}
-                      />
-                    </button>
-                  ))}
+          {/* Movies Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+            {currentMovies.map((movie) => {
+              const userRating = ratings.get(movie.id) || 0;
+              return (
+                <div key={movie.id} className="relative">
+                  <MovieCard
+                    movie={movie}
+                    score={userRating}
+                    onClick={() => setSelectedMovie(movie)}
+                  />
+                  {userRating > 0 && (
+                    <div className="absolute top-2 right-2 bg-[#e50914] text-white px-2 py-1 rounded-full text-xs font-bold z-10">
+                      ★ {userRating}
+                    </div>
+                  )}
                 </div>
-              </div>
+              );
+            })}
+          </div>
 
-              <div className="flex gap-3">
-                <button
-                  onClick={handleSkip}
-                  className="flex-1 bg-[#2f2f2f] hover:bg-gray-700 text-white py-3 rounded font-semibold transition-colors"
-                >
-                  Skip
-                </button>
-                {ratings.size >= MIN_RATINGS && (
-                  <button
-                    onClick={submitRatings}
-                    disabled={submitting}
-                    className="flex-1 bg-[#e50914] hover:bg-[#f40612] text-white py-3 rounded font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {submitting ? 'Submitting...' : 'Finish & Get Recommendations'}
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
+          {/* Navigation */}
+          <div className="flex gap-3 justify-center mb-8">
+            <button
+              onClick={handlePrevious}
+              disabled={!hasPrevious}
+              className="bg-[#2f2f2f] hover:bg-gray-700 text-white px-6 py-3 rounded font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <button
+              onClick={handleNext}
+              disabled={!hasNext}
+              className="bg-[#2f2f2f] hover:bg-gray-700 text-white px-6 py-3 rounded font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+            {ratings.size >= MIN_RATINGS && (
+              <button
+                onClick={submitRatings}
+                disabled={submitting}
+                className="bg-[#e50914] hover:bg-[#f40612] text-white px-8 py-3 rounded font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? 'Submitting...' : 'Finish & Get Recommendations'}
+              </button>
+            )}
+          </div>
 
           {/* Rated Movies Preview */}
           {ratings.size > 0 && (
             <div className="mt-8">
               <h3 className="text-white font-semibold mb-4">Your Ratings ({ratings.size})</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-60 overflow-y-auto">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 max-h-60 overflow-y-auto">
                 {Array.from(ratings.entries()).map(([movieId, rating]) => {
                   const movie = movies.find(m => m.id === movieId);
                   return (
@@ -306,6 +307,16 @@ export default function OnboardingPage() {
           )}
         </div>
       </div>
+
+      {/* Movie Details Modal */}
+      {selectedMovie && (
+        <MovieDetailsModal
+          movie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
+          userRating={ratings.get(selectedMovie.id) || 0}
+          onRate={(rating) => handleRating(selectedMovie.id, rating)}
+        />
+      )}
     </div>
   );
 }
