@@ -146,8 +146,27 @@ export class MatrixFactorizationModel implements RecommenderModel {
     for (const itemId of this.itemIds) {
       if (excludeItems.has(itemId)) continue;
 
-      const score = this.predict(userId, itemId);
+      // Compute score directly using the userFactor (handles both existing and new users)
+      const itemFactor = this.itemFactors.get(itemId);
+      if (!itemFactor) continue;
+      
+      const score = this.dotProduct(userFactor, itemFactor);
       scores.push({ itemId, score });
+    }
+
+    // Normalize scores to 1-5 scale BEFORE sorting
+    if (scores.length > 0) {
+      const allScores = scores.map(s => s.score);
+      const maxScore = Math.max(...allScores);
+      const minScore = Math.min(...allScores);
+      const scoreRange = maxScore - minScore;
+      
+      scores.forEach(item => {
+        // Normalize to 1-5 scale
+        item.score = scoreRange > 0
+          ? ((item.score - minScore) / scoreRange) * 4 + 1
+          : 3.0;  // Default to middle if no range
+      });
     }
 
     scores.sort((a, b) => b.score - a.score);

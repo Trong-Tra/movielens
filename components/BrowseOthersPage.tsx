@@ -1,18 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Recommendation, ModelInfo } from '@/types';
-import { getModels, getRecommendations } from '@/lib/api';
-import { FaStar, FaRandom, FaPlay, FaRobot } from 'react-icons/fa';
+import { useState, useEffect } from "react";
+import { Recommendation, ModelInfo, Movie } from "@/types";
+import { getModels, getRecommendations } from "@/lib/api";
+import { FaStar, FaRandom, FaPlay, FaRobot } from "react-icons/fa";
+import MovieCard from "@/components/MovieCard";
+import MovieDetailsModal from "@/components/MovieDetailsModal";
 
 export default function BrowseOthersPage() {
   const [models, setModels] = useState<ModelInfo[]>([]);
-  const [selectedModel, setSelectedModel] = useState<string>('');
+  const [selectedModel, setSelectedModel] = useState<string>("");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [topK, setTopK] = useState(10);
   const [viewingUserId, setViewingUserId] = useState<number>(1);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
   useEffect(() => {
     loadModels();
@@ -29,13 +32,15 @@ export default function BrowseOthersPage() {
     try {
       const availableModels = await getModels();
       // Filter out Popularity model
-      const filteredModels = availableModels.filter(m => m.name !== 'Popularity');
+      const filteredModels = availableModels.filter(
+        (m) => m.name !== "Popularity"
+      );
       setModels(filteredModels);
       if (filteredModels.length > 0) {
         setSelectedModel(filteredModels[0].name);
       }
     } catch (err) {
-      setError('Failed to load models');
+      setError("Failed to load models");
       console.error(err);
     }
   };
@@ -55,14 +60,14 @@ export default function BrowseOthersPage() {
       const recs = await getRecommendations(viewingUserId, selectedModel, topK);
       setRecommendations(recs);
     } catch (err) {
-      setError('Failed to load recommendations');
+      setError("Failed to load recommendations");
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const currentModel = models.find(m => m.name === selectedModel);
+  const currentModel = models.find((m) => m.name === selectedModel);
 
   return (
     <div className="min-h-screen bg-[#141414]">
@@ -75,11 +80,13 @@ export default function BrowseOthersPage() {
           <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
             Explore what other users are watching
           </p>
-          
+
           <div className="flex items-center justify-center gap-4 mb-8">
             <div className="bg-[#1a1a1a] border border-gray-800 rounded px-6 py-3">
               <span className="text-gray-500 text-sm">Viewing: </span>
-              <span className="text-xl font-bold text-white">User #{viewingUserId}</span>
+              <span className="text-xl font-bold text-white">
+                User #{viewingUserId}
+              </span>
             </div>
             <button
               onClick={loadRandomUser}
@@ -105,12 +112,16 @@ export default function BrowseOthersPage() {
               onChange={(e) => setSelectedModel(e.target.value)}
               className="w-full bg-[#2f2f2f] border border-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:border-[#e50914]"
             >
-              {models.map(model => (
-                <option key={model.name} value={model.name}>{model.name}</option>
+              {models.map((model) => (
+                <option key={model.name} value={model.name}>
+                  {model.name}
+                </option>
               ))}
             </select>
             {currentModel && (
-              <p className="text-gray-400 text-sm mt-3">{currentModel.description}</p>
+              <p className="text-gray-400 text-sm mt-3">
+                {currentModel.description}
+              </p>
             )}
           </div>
 
@@ -158,38 +169,25 @@ export default function BrowseOthersPage() {
         {!loading && !error && recommendations.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {recommendations.map((rec, index) => (
-              <div key={rec.movie.id} className="movie-card relative group">
-                {/* Rank Badge */}
-                <div className="absolute top-2 left-2 bg-[#e50914] text-white px-3 py-1 rounded font-bold text-sm z-10">
-                  #{index + 1}
-                </div>
-
-                <div className="aspect-[2/3] bg-[#2f2f2f] flex items-center justify-center p-4 relative overflow-hidden">
-                  <div className="text-center">
-                    <FaStar className="text-[#e50914] text-4xl mx-auto mb-2" />
-                    <p className="text-xs text-gray-500">Score</p>
-                    <p className="text-2xl font-bold text-white">{rec.score.toFixed(4)}</p>
-                  </div>
-                  
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-black bg-opacity-80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <FaPlay className="text-white text-3xl" />
-                  </div>
-                </div>
-
-                <div className="p-3">
-                  <h3 className="font-semibold text-sm mb-2 line-clamp-2">{rec.movie.title}</h3>
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {rec.movie.genres.slice(0, 3).map(genre => (
-                      <span key={genre} className="genre-tag text-xs">{genre}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              <MovieCard
+                key={rec.movie.id}
+                movie={rec.movie}
+                rank={index + 1}
+                score={rec.score}
+                onClick={() => setSelectedMovie(rec.movie)}
+              />
             ))}
           </div>
         )}
       </div>
+
+      {/* Movie Details Modal */}
+      {selectedMovie && (
+        <MovieDetailsModal
+          movie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
+        />
+      )}
     </div>
   );
 }

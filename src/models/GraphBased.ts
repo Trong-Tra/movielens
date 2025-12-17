@@ -123,8 +123,26 @@ export class GraphBasedModel implements RecommenderModel {
       });
     }
 
+    // Apply log scaling to visit counts for better distribution
+    recommendations.forEach(item => {
+      item.score = Math.log1p(item.score);
+    });
+    
+    // Sort by log-scaled scores
     recommendations.sort((a, b) => b.score - a.score);
-    return recommendations.slice(0, n);
+    
+    // Use rank-based scoring instead of min-max normalization
+    // This ensures even distribution regardless of score distribution
+    const totalItems = Math.min(recommendations.length, n * 2); // Consider 2x items for normalization
+    const topItems = recommendations.slice(0, totalItems);
+    
+    topItems.forEach((item, index) => {
+      // Rank-based score: linear interpolation from 5.0 to 1.0
+      // Top item = 5.0, bottom item = 1.0
+      item.score = 5.0 - (index / Math.max(1, totalItems - 1)) * 4.0;
+    });
+    
+    return topItems.slice(0, n);
   }
 
   private randomWalkWithRestart(startNode: string): Map<string, number> {

@@ -155,14 +155,28 @@ export class ItemItemCF implements RecommenderModel {
     }
 
     // Sort by score
-    const recommendations = Array.from(scores.entries())
-      .map(([itemId, score]) => ({
-        itemId,
-        score,
-        explanation: 'Similar to items you liked'
-      }))
-      .sort((a, b) => b.score - a.score)
-      .slice(0, n);
+    const sortedScores = Array.from(scores.entries())
+      .sort((a, b) => b[1] - a[1]);
+    
+    // Normalize scores to 0-5 scale
+    const maxScore = sortedScores.length > 0 ? sortedScores[0][1] : 1;
+    const minScore = sortedScores.length > 0 ? sortedScores[sortedScores.length - 1][1] : 0;
+    const scoreRange = maxScore - minScore;
+    
+    const recommendations = sortedScores
+      .slice(0, n)
+      .map(([itemId, rawScore]) => {
+        // Normalize to 0-5 scale
+        const normalizedScore = scoreRange > 0 
+          ? ((rawScore - minScore) / scoreRange) * 4 + 1  // Scale to 1-5
+          : 3.0;  // Default to middle if no range
+        
+        return {
+          itemId,
+          score: normalizedScore,
+          explanation: 'Similar to items you liked'
+        };
+      });
 
     return recommendations;
   }

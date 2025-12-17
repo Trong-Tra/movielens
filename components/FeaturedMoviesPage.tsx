@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Movie } from '@/types';
-import { FaTrophy } from 'react-icons/fa';
-import { useUser } from '@/contexts/UserContext';
-import MovieCard from '@/components/MovieCard';
-import MovieDetailsModal from '@/components/MovieDetailsModal';
+import { useState, useEffect } from "react";
+import { Movie } from "@/types";
+import { FaTrophy } from "react-icons/fa";
+import { useUser } from "@/contexts/UserContext";
+import MovieCard from "@/components/MovieCard";
+import MovieDetailsModal from "@/components/MovieDetailsModal";
 
 interface RankedMovie extends Movie {
   score: number;
@@ -35,20 +35,22 @@ export default function FeaturedMoviesPage() {
       setLoading(true);
       // Get recommendations using Popularity model for a random user
       // This gives us the highest-rated movies
-      const response = await fetch(`/api/recommendations/1?model=Popularity&n=50`);
+      const response = await fetch(
+        `/api/recommendations/1?model=Popularity&n=50`
+      );
       const data = await response.json();
-      
+
       const ranked = data.recommendations.map((rec: any, index: number) => ({
         id: rec.itemId,
         title: rec.title,
         genres: rec.genres,
         score: rec.score,
-        rank: index + 1
+        rank: index + 1,
       }));
-      
+
       setRankedMovies(ranked);
     } catch (error) {
-      console.error('Failed to load featured movies:', error);
+      console.error("Failed to load featured movies:", error);
     } finally {
       setLoading(false);
     }
@@ -58,14 +60,14 @@ export default function FeaturedMoviesPage() {
     try {
       const response = await fetch(`/api/ratings/${currentUserId}/${movieId}`);
       const data = await response.json();
-      
+
       if (data.rated) {
         setUserRating(data.rating);
       } else {
         setUserRating(0);
       }
     } catch (error) {
-      console.error('Failed to load user rating:', error);
+      console.error("Failed to load user rating:", error);
       setUserRating(0);
     }
   };
@@ -74,31 +76,29 @@ export default function FeaturedMoviesPage() {
     if (!selectedMovie) return;
 
     try {
-      const response = await fetch('/api/ratings', {
-        method: 'POST',
+      const response = await fetch("/api/ratings", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userId: currentUserId,
           movieId: selectedMovie.id,
-          rating
-        })
+          rating,
+        }),
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         setUserRating(rating);
         // Close modal after short delay
         setTimeout(() => setSelectedMovie(null), 500);
       }
     } catch (error) {
-      console.error('Failed to submit rating:', error);
+      console.error("Failed to submit rating:", error);
     }
   };
-
-
 
   if (loading) {
     return (
@@ -121,9 +121,6 @@ export default function FeaturedMoviesPage() {
           </div>
           <p className="text-xl text-gray-400 mb-4">
             Top-rated movies by the community
-          </p>
-          <p className="text-sm text-gray-500">
-            Click on any movie to rate it yourself
           </p>
         </div>
       </div>

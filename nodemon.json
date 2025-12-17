@@ -1,0 +1,6 @@
+{
+  "watch": ["src"],
+  "ext": "ts,json",
+  "ignore": ["data/**", "dist/**", ".next/**", "node_modules/**"],
+  "exec": "ts-node src/server.ts"
+}

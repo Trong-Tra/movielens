@@ -1,24 +1,27 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { User, Recommendation, ModelInfo, Movie } from '@/types';
-import { getModels, getRecommendations, searchMovies } from '@/lib/api';
-import { FaRobot, FaChartLine, FaSearch, FaStar, FaHome } from 'react-icons/fa';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import { User, Recommendation, ModelInfo, Movie } from "@/types";
+import { getModels, getRecommendations, searchMovies } from "@/lib/api";
+import { FaRobot, FaChartLine, FaSearch, FaStar, FaHome } from "react-icons/fa";
+import Link from "next/link";
 
 interface DashboardPageProps {
   user: User;
   userRatings: Map<number, number>;
 }
 
-export default function DashboardPage({ user, userRatings }: DashboardPageProps) {
+export default function DashboardPage({
+  user,
+  userRatings,
+}: DashboardPageProps) {
   const [models, setModels] = useState<ModelInfo[]>([]);
-  const [selectedModel, setSelectedModel] = useState<string>('');
+  const [selectedModel, setSelectedModel] = useState<string>("");
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [topK, setTopK] = useState(10);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
 
   useEffect(() => {
@@ -39,7 +42,7 @@ export default function DashboardPage({ user, userRatings }: DashboardPageProps)
         setSelectedModel(availableModels[0].name);
       }
     } catch (err) {
-      setError('Failed to load models');
+      setError("Failed to load models");
       console.error(err);
     }
   };
@@ -54,7 +57,7 @@ export default function DashboardPage({ user, userRatings }: DashboardPageProps)
       const recs = await getRecommendations(user.id, selectedModel, topK);
       setRecommendations(recs);
     } catch (err) {
-      setError('Failed to load recommendations');
+      setError("Failed to load recommendations");
       console.error(err);
     } finally {
       setLoading(false);
@@ -71,7 +74,7 @@ export default function DashboardPage({ user, userRatings }: DashboardPageProps)
       const results = await searchMovies(searchQuery);
       setSearchResults(results);
     } catch (err) {
-      console.error('Search failed:', err);
+      console.error("Search failed:", err);
     }
   };
 
@@ -79,27 +82,27 @@ export default function DashboardPage({ user, userRatings }: DashboardPageProps)
     return userRatings.get(movieId);
   };
 
-  const currentModel = models.find(m => m.name === selectedModel);
+  const currentModel = models.find((m) => m.name === selectedModel);
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-4 transition-colors"
           >
             <FaHome />
             Back to Home
           </Link>
-          <h1 className="text-5xl font-bold mb-3">Your Personalized Recommendations</h1>
+          <h1 className="text-5xl font-bold mb-3">
+            Your Personalized Recommendations
+          </h1>
           <p className="text-xl text-white/90">
             Based on your ratings of {userRatings.size} movies
           </p>
-          <p className="text-lg text-white/80 mt-2">
-            User ID: #{user.id}
-          </p>
+          <p className="text-lg text-white/80 mt-2">User ID: #{user.id}</p>
         </div>
       </div>
 
@@ -117,7 +120,7 @@ export default function DashboardPage({ user, userRatings }: DashboardPageProps)
               onChange={(e) => setSelectedModel(e.target.value)}
               className="max-w-md w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition-colors bg-white text-lg"
             >
-              {models.map(model => (
+              {models.map((model) => (
                 <option key={model.name} value={model.name}>
                   {model.name}
                 </option>
@@ -162,7 +165,7 @@ export default function DashboardPage({ user, userRatings }: DashboardPageProps)
                 placeholder="Search for movies..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                 className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition-colors"
               />
               <button onClick={handleSearch} className="btn btn-secondary">
@@ -178,14 +181,18 @@ export default function DashboardPage({ user, userRatings }: DashboardPageProps)
         {/* Search Results */}
         {searchResults.length > 0 && (
           <div className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Search Results</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">
+              Search Results
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {searchResults.map(movie => {
+              {searchResults.map((movie) => {
                 const userRating = getRatingForMovie(movie.id);
                 return (
                   <div key={movie.id} className="card p-6">
                     <div className="flex justify-between items-start gap-3 mb-4">
-                      <h3 className="text-lg font-semibold text-gray-800">{movie.title}</h3>
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {movie.title}
+                      </h3>
                       {userRating && (
                         <div className="flex items-center gap-1 bg-indigo-500 text-white px-3 py-1 rounded-full font-semibold whitespace-nowrap">
                           <FaStar className="text-sm" /> {userRating}
@@ -193,8 +200,10 @@ export default function DashboardPage({ user, userRatings }: DashboardPageProps)
                       )}
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {movie.genres.map(genre => (
-                        <span key={genre} className="genre-tag">{genre}</span>
+                      {movie.genres.map((genre) => (
+                        <span key={genre} className="genre-tag">
+                          {genre}
+                        </span>
                       ))}
                     </div>
                   </div>
@@ -214,7 +223,9 @@ export default function DashboardPage({ user, userRatings }: DashboardPageProps)
           {loading && (
             <div className="flex flex-col items-center justify-center py-16">
               <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-              <p className="text-gray-600 text-lg">Loading recommendations...</p>
+              <p className="text-gray-600 text-lg">
+                Loading recommendations...
+              </p>
             </div>
           )}
 
@@ -229,7 +240,9 @@ export default function DashboardPage({ user, userRatings }: DashboardPageProps)
 
           {!loading && !error && recommendations.length === 0 && (
             <div className="text-center py-16">
-              <p className="text-gray-500 text-xl">No recommendations available</p>
+              <p className="text-gray-500 text-xl">
+                No recommendations available
+              </p>
             </div>
           )}
 
@@ -238,7 +251,10 @@ export default function DashboardPage({ user, userRatings }: DashboardPageProps)
               {recommendations.map((rec, index) => {
                 const userRating = getRatingForMovie(rec.movie.id);
                 return (
-                  <div key={rec.movie.id} className="card p-6 relative overflow-hidden">
+                  <div
+                    key={rec.movie.id}
+                    className="card p-6 relative overflow-hidden"
+                  >
                     {/* Rank Badge */}
                     <div className="absolute top-0 right-0 bg-indigo-500 text-white px-4 py-2 rounded-bl-xl font-bold text-lg">
                       #{index + 1}
@@ -249,13 +265,17 @@ export default function DashboardPage({ user, userRatings }: DashboardPageProps)
                         {rec.movie.title}
                       </h3>
                       <div className="flex flex-wrap gap-2 mb-3">
-                        {rec.movie.genres.map(genre => (
-                          <span key={genre} className="genre-tag">{genre}</span>
+                        {rec.movie.genres.map((genre) => (
+                          <span key={genre} className="genre-tag">
+                            {genre}
+                          </span>
                         ))}
                       </div>
                       <div className="bg-gray-100 rounded-lg px-3 py-2 text-sm">
                         <span className="text-gray-600">Score: </span>
-                        <span className="font-bold text-indigo-600">{rec.score.toFixed(3)}</span>
+                        <span className="font-bold text-indigo-600">
+                          {rec.score.toFixed(1)}
+                        </span>
                       </div>
                       {userRating && (
                         <div className="mt-2 flex items-center gap-1 text-green-600 font-semibold text-sm">
@@ -272,16 +292,20 @@ export default function DashboardPage({ user, userRatings }: DashboardPageProps)
 
         {/* Your Ratings */}
         <div className="bg-white rounded-xl shadow-md p-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">Your Ratings</h2>
+          <h2 className="text-3xl font-bold text-gray-800 mb-6">
+            Your Ratings
+          </h2>
           <p className="text-lg text-gray-600 mb-6">
             You've rated {userRatings.size} movies
           </p>
-          
+
           <div className="space-y-4 max-w-2xl">
-            {[5, 4, 3, 2, 1].map(rating => {
-              const count = Array.from(userRatings.values()).filter(r => r === rating).length;
+            {[5, 4, 3, 2, 1].map((rating) => {
+              const count = Array.from(userRatings.values()).filter(
+                (r) => r === rating
+              ).length;
               const percentage = (count / userRatings.size) * 100;
-              
+
               return (
                 <div key={rating} className="flex items-center gap-4">
                   <div className="flex items-center gap-1 min-w-[60px] font-semibold text-gray-700">
